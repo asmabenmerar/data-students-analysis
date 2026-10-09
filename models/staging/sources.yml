@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: Données brutes des étudiants OpenClassrooms
+
+    database: OPENCLASSROOMS_DB
+    schema: STUDENT_ANALYSIS
+
+    tables:
+      - name: RAW_STUDENTS
+        description: Données importées depuis le fichier CSV
+
+        columns:
+          - name: USER_ID
+            description: Identifiant technique unique de l'étudiant
+
+          - name: PATH_CATEGORY_NAME
+            description: Catégorie du parcours suivi par l'étudiant
+
+          - name: AGE_GROUP
+            description: Classe d'âge de l'étudiant au moment du début du parcours
+
+          - name: GENDER
+            description: Genre déclaré par l'étudiant
+
+          - name: REGION
+            description: Région de résidence de l'étudiant
+
+          - name: YEAR_PATH_STARTED
+            description: Année de début du parcours
