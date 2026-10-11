@@ -9,23 +9,43 @@ sources:
 
     tables:
       - name: RAW_STUDENTS
-        description: Données importées depuis le fichier CSV
+        description: >
+          Données importées depuis le fichier CSV. Une ligne correspond à une
+          inscription d'un étudiant à un parcours Data (un même étudiant peut
+          apparaître plusieurs fois s'il s'est réinscrit une autre année).
 
         columns:
           - name: USER_ID
-            description: Identifiant technique unique de l'étudiant
+            description: >
+              Identifiant technique unique de l'étudiant. Attention : il n'est
+              pas unique par ligne, car certains étudiants ont plusieurs inscriptions.
+            data_tests:
+              - not_null
 
           - name: PATH_CATEGORY_NAME
             description: Catégorie du parcours suivi par l'étudiant
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['Data']
 
           - name: AGE_GROUP
             description: Classe d'âge de l'étudiant au moment du début du parcours
+            data_tests:
+              - not_null
 
           - name: GENDER
-            description: Genre déclaré par l'étudiant
+            description: >
+              Genre déclaré par l'étudiant. Environ 27 % de valeurs manquantes
+              (champ facultatif), volontairement sans test not_null.
 
           - name: REGION
             description: Région de résidence de l'étudiant
+            data_tests:
+              - not_null
 
           - name: YEAR_PATH_STARTED
             description: Année de début du parcours
+            data_tests:
+              - not_null
