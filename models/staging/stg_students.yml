@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_students
+    description: >
+      Inscriptions aux parcours Data, nettoyées et pseudonymisées.
+      Une ligne = une inscription (étudiant x année de début).
+    columns:
+      - name: student_key
+        description: Identifiant étudiant haché (SHA-256). Non unique car réinscriptions possibles.
+        data_tests:
+          - not_null
+      - name: path_category
+        description: Catégorie du parcours (toujours Data).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Data']
+      - name: age_group
+        description: Tranche d'âge de l'étudiant.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['20-24 ans','25-29 ans','30-34 ans','35-39 ans','40-44 ans','45-49 ans','50-54 ans','55-59 ans','60 ans ou plus']
+      - name: gender
+        description: Femme, Homme ou Non renseigné (27 % de valeurs manquantes conservées).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Femme','Homme','Non renseigné']
+      - name: region
+        description: Région de résidence.
+        data_tests:
+          - not_null
+      - name: enrollment_year
+        description: Année de début du parcours.
+        data_tests:
+          - not_null
