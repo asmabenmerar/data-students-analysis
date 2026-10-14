@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: int_enrollments
+    description: >
+      Inscriptions enrichies : tranche « moins de 40 ans / 40 ans et plus »
+      et rang d'inscription de l'étudiant.
+    columns:
+      - name: age_band_40
+        description: Moins de 40 ans ou 40 ans et plus.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Moins de 40 ans', '40 ans et plus']
+
+  - name: fct_enrollments
+    description: >
+      Table finale, une ligne par inscription (étudiant x année).
+      Pseudonymisée, sans donnée directement identifiante.
+    columns:
+      - name: student_key
+        description: Identifiant étudiant haché.
+        data_tests:
+          - not_null
+      - name: enrollment_rank
+        description: Numéro d'inscription de l'étudiant (1 = première).
+        data_tests:
+          - not_null
+
+  - name: mart_profile_by_year
+    description: >
+      Répartition par année et par dimension (âge, genre, région).
+      Les groupes de moins de 5 personnes sont masqués (règle d'anonymat).
+    columns:
+      - name: enrollment_year
+        description: Année de début du parcours.
+        data_tests:
+          - not_null
+      - name: dimension
+        description: Dimension analysée (Age, Genre ou Region).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Age', 'Genre', 'Region']
+      - name: share_pct
+        description: Part en pourcentage de l'effectif de l'année (vide si groupe masqué).
+        
