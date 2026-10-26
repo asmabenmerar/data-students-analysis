@@ -30,11 +30,28 @@ models:
               arguments:
                 values: ['Femme','Homme','Non renseigné']
       - name: region
-        description: Région de résidence.
+        description: >
+          Région de résidence (13 modalités). Libellés contrôlés : les départements
+          d'outre-mer sont regroupés sous « DROM » dans la source interne.
         data_tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Île-de-France"
+                  - "Auvergne-Rhône-Alpes"
+                  - "Hauts-de-France"
+                  - "Nouvelle-Aquitaine"
+                  - "Provence-Alpes-Côte d''Azur"
+                  - "Occitanie"
+                  - "Grand Est"
+                  - "Pays de la Loire"
+                  - "Bretagne"
+                  - "Centre-Val de Loire"
+                  - "Normandie"
+                  - "Bourgogne-Franche-Comté"
+                  - "DROM"
       - name: enrollment_year
         description: Année de début du parcours.
         data_tests:
           - not_null
-          

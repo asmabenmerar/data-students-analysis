@@ -16,7 +16,9 @@ models:
 
   - name: fct_enrollments
     description: >
-      Table finale, une ligne par inscription (étudiant x année).
+      Table finale. Grain : une ligne = une inscription (étudiant x année de début),
+      unique par couple (student_key, enrollment_year). Pour compter des étudiants
+      distincts, filtrer sur enrollment_rank = 1 (4 010 étudiants pour 4 647 inscriptions).
       Pseudonymisée, sans donnée directement identifiante.
     columns:
       - name: student_key
@@ -30,8 +32,9 @@ models:
 
   - name: mart_profile_by_year
     description: >
-      Répartition par année et par dimension (âge, genre, région).
-      Les groupes de moins de 5 personnes sont masqués (règle d'anonymat).
+      Répartition par année et par dimension (âge, genre, région), calculée sur les
+      inscriptions. Les groupes de moins de 5 personnes sont masqués (is_suppressed = true).
+      Limite : une cellule masquée peut se déduire du total de l'année.
     columns:
       - name: enrollment_year
         description: Année de début du parcours.
@@ -45,4 +48,3 @@ models:
                 values: ['Age', 'Genre', 'Region']
       - name: share_pct
         description: Part en pourcentage de l'effectif de l'année (vide si groupe masqué).
-        
