@@ -48,3 +48,8 @@ models:
                 values: ['Age', 'Genre', 'Region']
       - name: share_pct
         description: Part en pourcentage de l'effectif de l'année (vide si groupe masqué).
+      - name: share_known_gender_pct
+        description: >
+          Part de la modalité parmi les inscriptions dont le genre est renseigné
+          (Femme ou Homme uniquement, « Non renseigné » exclu du dénominateur).
+          Renseignée seulement pour la dimension Genre.
