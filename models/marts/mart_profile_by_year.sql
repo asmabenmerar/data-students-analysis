@@ -19,6 +19,12 @@ with base as (
     from {{ ref('fct_enrollments') }}
     group by 1, 2, 3
 
+    union all
+
+    select enrollment_year, 'Statut', student_status, count(*)
+    from {{ ref('fct_enrollments') }}
+    group by 1, 2, 3
+
 ),
 
 tot as (

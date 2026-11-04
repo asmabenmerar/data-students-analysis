@@ -16,6 +16,15 @@ models:
           - accepted_values:
               arguments:
                 values: ['Nouveau','Revenant']
+      - name: age_band_40
+        description: >
+          Regroupement simplifié en deux classes (Moins de 40 ans / 40 ans et plus),
+          pour présenter le rajeunissement de façon lisible à un public non technique.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Moins de 40 ans','40 ans et plus']
       - name: age_group_diffusion
         description: >
           Tranche d'âge pour les sorties diffusées. 55-59 ans et 60 ans ou plus sont regroupés

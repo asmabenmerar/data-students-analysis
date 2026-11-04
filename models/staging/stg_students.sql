@@ -1,5 +1,5 @@
 select
-    sha2(trim(USER_ID), 256)          as student_key,
+    sha2(concat(trim(USER_ID), '{{ var("hash_salt") }}'), 256) as student_key,
     trim(PATH_CATEGORY_NAME)          as path_category,
     trim(AGE_GROUP)                   as age_group,
     case upper(trim(GENDER))
