@@ -3,55 +3,48 @@ version: 2
 models:
   - name: stg_students
     description: >
-      Inscriptions aux parcours Data, nettoyées et pseudonymisées.
-      Une ligne = une inscription (étudiant x année de début).
+      Couche staging des inscriptions aux parcours Data. Une ligne = une inscription
+      (un étudiant, une année de démarrage). Nettoyage minimal : trim des libellés,
+      pseudonymisation de l'identifiant, normalisation du genre, typage de l'année.
     columns:
       - name: student_key
-        description: Identifiant étudiant haché (SHA-256). Non unique car réinscriptions possibles.
+        description: Identifiant étudiant pseudonymisé (SHA-256 avec sel). USER_ID n'est jamais exposé.
         data_tests:
           - not_null
       - name: path_category
-        description: Catégorie du parcours (toujours Data).
+        description: Catégorie de parcours (une seule valeur, "Data").
         data_tests:
+          - not_null
           - accepted_values:
               arguments:
                 values: ['Data']
       - name: age_group
-        description: Tranche d'âge de l'étudiant.
+        description: Tranche d'âge au début du parcours (9 tranches de 20-24 ans à 60 ans ou plus).
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: ['20-24 ans','25-29 ans','30-34 ans','35-39 ans','40-44 ans','45-49 ans','50-54 ans','55-59 ans','60 ans ou plus']
       - name: gender
-        description: Femme, Homme ou Non renseigné (27 % de valeurs manquantes conservées).
+        description: >
+          Genre déclaré : Femme, Homme, ou Non renseigné. Les valeurs vides sont conservées
+          dans "Non renseigné" et non supprimées (26,8 % des lignes).
         data_tests:
+          - not_null
           - accepted_values:
               arguments:
                 values: ['Femme','Homme','Non renseigné']
       - name: region
-        description: >
-          Région de résidence (13 modalités). Libellés contrôlés : les départements
-          d'outre-mer sont regroupés sous « DROM » dans la source interne.
+        description: Région de résidence (13 modalités, dont DROM regroupés ; Corse absente).
         data_tests:
           - not_null
           - accepted_values:
               arguments:
-                values:
-                  - "Île-de-France"
-                  - "Auvergne-Rhône-Alpes"
-                  - "Hauts-de-France"
-                  - "Nouvelle-Aquitaine"
-                  - "Provence-Alpes-Côte d''Azur"
-                  - "Occitanie"
-                  - "Grand Est"
-                  - "Pays de la Loire"
-                  - "Bretagne"
-                  - "Centre-Val de Loire"
-                  - "Normandie"
-                  - "Bourgogne-Franche-Comté"
-                  - "DROM"
+                values: ['Île-de-France','Auvergne-Rhône-Alpes','Hauts-de-France','Nouvelle-Aquitaine',"Provence-Alpes-Côte d''Azur",'Occitanie','Grand Est','Pays de la Loire','Bretagne','Centre-Val de Loire','Normandie','Bourgogne-Franche-Comté','DROM']
       - name: enrollment_year
-        description: Année de début du parcours.
+        description: Année de début du parcours (entier, 2022 à 2025).
         data_tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: [2022, 2023, 2024, 2025]

@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: int_enrollments
+    description: >
+      Enrichit le staging : rang d'inscription par étudiant, statut Nouveau/Revenant,
+      regroupement d'âge à 40 ans, et regroupement 55 ans et plus pour la diffusion (RGPD).
+    columns:
+      - name: enrollment_rank
+        description: Rang de l'inscription pour un même étudiant (1 = première, trié par année).
+        data_tests:
+          - not_null
+      - name: student_status
+        description: Nouveau (rang 1) ou Revenant (rang 2 et plus).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Nouveau','Revenant']
+      - name: age_group_diffusion
+        description: >
+          Tranche d'âge pour les sorties diffusées. 55-59 ans et 60 ans ou plus sont regroupés
+          en "55 ans et plus" pour éviter un effectif inférieur à 5 (3 personnes de 60 ans ou plus en 2024).
+        data_tests:
+          - not_null
