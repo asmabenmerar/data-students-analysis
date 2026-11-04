@@ -2,7 +2,9 @@ version: 2
 
 sources:
   - name: raw_data
-    description: Données brutes des étudiants OpenClassrooms
+    description: >
+      Données brutes du projet : inscriptions des étudiants OpenClassrooms
+      et estimations de population INSEE.
 
     database: OPENCLASSROOMS_DB
     schema: STUDENT_ANALYSIS
@@ -47,5 +49,48 @@ sources:
 
           - name: YEAR_PATH_STARTED
             description: Année de début du parcours
+            data_tests:
+              - not_null
+
+      - name: RAW_INSEE_POPULATION
+        description: >
+          Estimations de population INSEE au 1er janvier, par région, sexe et âge
+          quinquennal, années 2022 à 2025 (fichier estim-pop-nreg-sexe-aq-1975-2026.xlsx,
+          rubrique Statistiques d'insee.fr). Mis au format long : une ligne = une année,
+          une région, un sexe, une tranche d'âge (2 880 lignes). Les lignes de total
+          (France métropolitaine, DOM, France entière) ont été retirées.
+          Données agrégées et publiques : aucune donnée personnelle (pas d'enjeu RGPD).
+
+        columns:
+          - name: YEAR
+            description: Année de l'estimation (population au 1er janvier).
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [2022, 2023, 2024, 2025]
+
+          - name: REGION
+            description: >
+              Région au libellé INSEE (13 régions métropolitaines dont la Corse,
+              et 5 DOM détaillés). Harmonisation avec OpenClassrooms faite dans le staging.
+            data_tests:
+              - not_null
+
+          - name: SEX
+            description: Sexe au libellé INSEE (Hommes / Femmes).
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['Hommes', 'Femmes']
+
+          - name: AGE_GROUP
+            description: Tranche d'âge quinquennale au libellé INSEE (0 à 4 ans … 95 ans et plus).
+            data_tests:
+              - not_null
+
+          - name: POPULATION
+            description: Nombre d'habitants.
             data_tests:
               - not_null

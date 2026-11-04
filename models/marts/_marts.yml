@@ -4,7 +4,9 @@ models:
   - name: fct_enrollments
     description: >
       Table de faits : une ligne par inscription (4 647 lignes pour 4 010 étudiants).
-      Données pseudonymisées, sans identifiant direct. Le grain est (student_key, enrollment_year).
+      Le grain est (student_key, enrollment_year) : un étudiant ne s'inscrit qu'une fois par an.
+      Données pseudonymisées, sans identifiant direct.
+      Table de travail interne, non destinée à la diffusion.
     columns:
       - name: student_key
         data_tests:
@@ -20,9 +22,15 @@ models:
 
   - name: mart_profile_by_year
     description: >
-      Profil des inscrits par année, au format long (dimension, modalité). Les effectifs
-      inférieurs à 5 sont masqués (is_suppressed = true) : seuil RGPD.
-      share_pct = part des inscriptions de l'année ; share_known_gender_pct = part parmi les genres renseignés.
+      Profil des inscrits par année, au format long (dimension, modalité).
+      Indicateur retenu : nombre d'inscriptions par année. Comme un étudiant ne s'inscrit
+      qu'une fois par an (test assert_fct_enrollments_grain), cela correspond au nombre
+      d'étudiants actifs cette année-là. Les nouveaux étudiants sont isolés dans la dimension "Statut".
+      Table destinée à la diffusion. Les effectifs inférieurs à 5 sont masqués
+      (is_suppressed = true). Chaque dimension est agrégée séparément, sans croisement,
+      pour éviter les petits effectifs.
+      share_pct = part des inscriptions de l'année ;
+      share_known_gender_pct = part parmi les genres renseignés.
     columns:
       - name: enrollment_year
         data_tests:
@@ -36,6 +44,44 @@ models:
       - name: modality
         data_tests:
           - not_null
+      - name: is_suppressed
+        data_tests:
+          - not_null
+
+  - name: mart_comparison_oc_insee
+    description: >
+      Comparaison du profil des inscrits OpenClassrooms avec la population française
+      de 20 ans ou plus (INSEE, hors Corse), par année et par dimension (Age, Genre, Region).
+      Une ligne = une année, une dimension, une modalité (92 lignes : 23 modalités x 4 ans).
+      Pour le genre, seuls les genres renseignés sont comparés.
+      representation_index = 100 x part OC / part INSEE : 100 = même proportion que dans
+      la population, au-dessus de 100 = sur-représenté, en dessous = sous-représenté.
+      Limites : population INSEE au 1er janvier (provisoire pour 2024-2025) ; la population
+      de référence est l'ensemble des 20 ans ou plus, pas les seules personnes en reconversion ;
+      les tranches de 55 ans et plus sont regroupées des deux côtés.
+      Table destinée à la diffusion ; effectifs OC inférieurs à 5 masqués.
+    columns:
+      - name: year
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2022, 2023, 2024, 2025]
+      - name: dimension
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Age','Genre','Region']
+      - name: modality
+        data_tests:
+          - not_null
+      - name: insee_share_pct
+        description: Part de la modalité dans la population INSEE de 20 ans ou plus.
+        data_tests:
+          - not_null
+      - name: representation_index
+        description: 100 x part OC / part INSEE.
       - name: is_suppressed
         data_tests:
           - not_null

@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_insee_population
+    description: >
+      Population INSEE de 20 ans ou plus, harmonisée avec les catégories OpenClassrooms.
+      Une ligne = une année, une région, un sexe, une tranche d'âge (936 lignes).
+      Règles d'harmonisation : Centre-Val-de-Loire renommé ; Guadeloupe, Martinique,
+      Guyane, La Réunion et Mayotte regroupées en DROM ; Corse exclue (absente des
+      données OpenClassrooms) ; moins de 20 ans exclus ; tranches de 60 ans et plus
+      regroupées en "60 ans ou plus" ; libellés "20 à 24 ans" reformatés en "20-24 ans" ;
+      Hommes/Femmes renommés en Homme/Femme.
+    columns:
+      - name: year
+        description: Année de l'estimation (population au 1er janvier).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2022, 2023, 2024, 2025]
+      - name: region
+        description: Région, mêmes 13 libellés que stg_students.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Île-de-France','Auvergne-Rhône-Alpes','Hauts-de-France','Nouvelle-Aquitaine',"Provence-Alpes-Côte d''Azur",'Occitanie','Grand Est','Pays de la Loire','Bretagne','Centre-Val de Loire','Normandie','Bourgogne-Franche-Comté','DROM']
+      - name: gender
+        description: Sexe (Homme / Femme), aligné sur stg_students.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Femme','Homme']
+      - name: age_group
+        description: Tranche d'âge, mêmes 9 libellés que stg_students.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['20-24 ans','25-29 ans','30-34 ans','35-39 ans','40-44 ans','45-49 ans','50-54 ans','55-59 ans','60 ans ou plus']
+      - name: age_group_diffusion
+        description: Tranche d'âge avec 55-59 ans et 60 ans ou plus regroupés, comme int_enrollments.
+        data_tests:
+          - not_null
+      - name: population
+        description: Nombre d'habitants.
+        data_tests:
+          - not_null
