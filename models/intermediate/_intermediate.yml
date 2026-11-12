@@ -1,33 +1,51 @@
+# Version du format de configuration dbt
 version: 2
 
+# Je décris ici mes modèles et les tests de qualité que je leur applique
 models:
+  # Modèle intermédiaire : il part de stg_students (déjà nettoyé) et ajoute mes règles métier
   - name: int_enrollments
     description: >
       Enrichit le staging : rang d'inscription par étudiant, statut Nouveau/Revenant,
       regroupement d'âge à 40 ans, et regroupement 55 ans et plus pour la diffusion (RGPD).
     columns:
+      # Numéro d'inscription d'un étudiant (1 = première, 2 = réinscription, etc.)
+      # Il me permet de compter les étudiants distincts avec rang = 1
       - name: enrollment_rank
         description: Rang de l'inscription pour un même étudiant (1 = première, trié par année).
         data_tests:
+          # Test : aucune ligne sans rang
           - not_null
+
+      # Version lisible du rang pour la présentation : Nouveau ou Revenant
       - name: student_status
         description: Nouveau (rang 1) ou Revenant (rang 2 et plus).
         data_tests:
+          # Test : seules ces deux valeurs sont acceptées
           - accepted_values:
               arguments:
                 values: ['Nouveau','Revenant']
+
+      # Regroupement en 2 classes d'âge, plus simple à présenter qu'avec 9 tranches
       - name: age_band_40
         description: >
           Regroupement simplifié en deux classes (Moins de 40 ans / 40 ans et plus),
           pour présenter le rajeunissement de façon lisible à un public non technique.
         data_tests:
+          # Test : aucune ligne sans classe d'âge
           - not_null
+          # Test : seulement les deux classes prévues
           - accepted_values:
               arguments:
                 values: ['Moins de 40 ans','40 ans et plus']
+
+      # Tranche d'âge pour les sorties diffusées (protection RGPD)
+      # Je regroupe 55-59 et 60 ans ou plus car cette dernière tranche
+      # n'avait que 3 personnes en 2024 (moins de 5), donc risque de réidentification
       - name: age_group_diffusion
         description: >
           Tranche d'âge pour les sorties diffusées. 55-59 ans et 60 ans ou plus sont regroupés
           en "55 ans et plus" pour éviter un effectif inférieur à 5 (3 personnes de 60 ans ou plus en 2024).
         data_tests:
+          # Test : aucune ligne sans tranche après le regroupement
           - not_null

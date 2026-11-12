@@ -1,6 +1,12 @@
+# Version du format de configuration dbt
 version: 2
 
+# Documentation et tests de mes trois tables finales (marts)
 models:
+
+  # ---------------------------------------------------------------
+  # TABLE 1 : fct_enrollments (table de faits, niveau inscription)
+  # ---------------------------------------------------------------
   - name: fct_enrollments
     description: >
       Table de faits : une ligne par inscription (4 647 lignes pour 4 010 étudiants).
@@ -8,18 +14,28 @@ models:
       Données pseudonymisées, sans identifiant direct.
       Table de travail interne, non destinée à la diffusion.
     columns:
+      # Identifiant haché de l'étudiant : jamais vide
       - name: student_key
         data_tests:
           - not_null
+      # Année de début du parcours : jamais vide
       - name: enrollment_year
         data_tests:
           - not_null
+      # Je vérifie que le recodage du genre n'a produit que les 3 valeurs prévues
       - name: gender
         data_tests:
           - accepted_values:
               arguments:
                 values: ['Femme','Homme','Non renseigné']
 
+  # ---------------------------------------------------------------
+  # TABLE 2 : mart_profile_by_year (profil des inscrits, pour la diffusion)
+  # ---------------------------------------------------------------
+  # Format « long » : une ligne par année, dimension et modalité
+  # Je justifie ici le choix de l'indicateur demandé par la mentor :
+  # comme il n'y a qu'une inscription par étudiant et par an (test de grain),
+  # compter les inscriptions revient à compter les étudiants actifs de l'année
   - name: mart_profile_by_year
     description: >
       Profil des inscrits par année, au format long (dimension, modalité).
@@ -32,22 +48,33 @@ models:
       share_pct = part des inscriptions de l'année ;
       share_known_gender_pct = part parmi les genres renseignés.
     columns:
+      # Année : jamais vide
       - name: enrollment_year
         data_tests:
           - not_null
+      # Dimension analysée : j'ai ajouté « Statut » (Nouveau / Revenant) aux trois dimensions de départ
       - name: dimension
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: ['Age','Genre','Region','Statut']
+      # Modalité (par exemple « 25-29 ans » ou « Bretagne ») : jamais vide
       - name: modality
         data_tests:
           - not_null
+      # Indicateur de masquage RGPD : doit toujours être vrai ou faux, jamais vide
       - name: is_suppressed
         data_tests:
           - not_null
 
+  # ---------------------------------------------------------------
+  # TABLE 3 : mart_comparison_oc_insee (comparaison avec la population française)
+  # ---------------------------------------------------------------
+  # C'est la table qui répond à l'étape INSEE : je compare la part de chaque
+  # modalité chez OpenClassrooms avec sa part dans la population
+  # Ses limites (année de référence, population de référence, regroupements)
+  # sont documentées ici, comme la mentor le demande
   - name: mart_comparison_oc_insee
     description: >
       Comparaison du profil des inscrits OpenClassrooms avec la population française
@@ -61,27 +88,35 @@ models:
       les tranches de 55 ans et plus sont regroupées des deux côtés.
       Table destinée à la diffusion ; effectifs OC inférieurs à 5 masqués.
     columns:
+      # Année : jamais vide, et seulement les 4 années étudiées
       - name: year
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: [2022, 2023, 2024, 2025]
+      # Ici, pas de dimension « Statut » : l'INSEE n'a pas d'équivalent à comparer
       - name: dimension
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: ['Age','Genre','Region']
+      # Modalité comparée (tranche d'âge, genre ou région) : jamais vide
       - name: modality
         data_tests:
           - not_null
+      # Part de la modalité dans la population INSEE : toujours renseignée,
+      # sinon l'indice ne peut pas être calculé
       - name: insee_share_pct
         description: Part de la modalité dans la population INSEE de 20 ans ou plus.
         data_tests:
           - not_null
+      # Indice de représentation : volontairement sans test not_null,
+      # car il peut être vide quand l'effectif OpenClassrooms est masqué (moins de 5)
       - name: representation_index
         description: 100 x part OC / part INSEE.
+      # Indicateur de masquage : jamais vide
       - name: is_suppressed
         data_tests:
           - not_null
