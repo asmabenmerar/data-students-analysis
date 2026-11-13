@@ -9,10 +9,11 @@ with src as (
     select
         YEAR                                              as year,
         -- trim() enlève les espaces parasites dans les textes
-        trim(REGION)                                      as region,
+        -- je nomme la colonne region_insee pour la distinguer de la région harmonisée de l'étape 2
+        trim(REGION)                                      as region_insee,
         trim(SEX)                                         as sex_insee,
         trim(AGE_GROUP)                                   as age_insee,
-        -- J'extrait l'âge minimum de la tranche (premier mot avant l'espace) :
+        -- J'extrais l'âge minimum de la tranche (premier mot avant l'espace) :
         -- « 20 à 24 ans » donne 20, « 60 ans ou plus » donne 60
         -- try_to_number renvoie vide (null) au lieu d'une erreur si le premier mot n'est pas un nombre
         try_to_number(split_part(trim(AGE_GROUP), ' ', 1)) as age_min,
